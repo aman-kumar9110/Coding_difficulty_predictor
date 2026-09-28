@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101311">
+  <title>Problem Difficulty Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #101311;
+      --panel: #171b18;
+      --panel-raised: #1d231f;
+      --line: #303832;
+      --text: #eef2ed;
+      --muted: #929d95;
+      --mint: #a8f078;
+      --mint-dark: #263b25;
+      --orange: #ffb46d;
+      --red: #ff826d;
+      --mono: "DM Mono", Consolas, monospace;
+      --sans: "Manrope", "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      min-height: 100vh;
+      background-color: var(--bg);
+      background-image: radial-gradient(ellipse at 86% 0%, #293329 0, transparent 34%), linear-gradient(135deg, transparent 70%, #171b17 100%);
+      color: var(--text);
+      font-family: var(--sans);
+    }
+    button, input { font: inherit; }
+    .shell { max-width: 1320px; margin: 0 auto; padding: 0 48px 64px; }
+    .topbar { height: 78px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #ffffff12; }
+    .brand { display: flex; align-items: center; gap: 12px; font-size: 13px; font-weight: 800; letter-spacing: .04em; }
+    .brand-mark { width: 30px; height: 30px; display: grid; place-items: center; color: var(--bg); background: var(--mint); font-family: var(--mono); font-size: 17px; font-weight: 500; }
+    .health { display: flex; align-items: center; gap: 9px; color: var(--muted); font-family: var(--mono); font-size: 11px; }
+    .health-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 12px #ffb46d66; }
+    .health.ready .health-dot { background: var(--mint); box-shadow: 0 0 12px #a8f07877; }
+    .intro { padding: 54px 0 38px; animation: rise .55s ease both; }
+    .eyebrow { color: var(--mint); font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 14px 0 10px; font-size: clamp(32px, 4vw, 48px); line-height: 1.08; letter-spacing: 0; }
+    .intro p { max-width: 580px; margin: 0; color: var(--muted); font-size: 14px; line-height: 1.7; }
+    .workspace { display: grid; grid-template-columns: minmax(0, 1.18fr) minmax(320px, .82fr); align-items: start; gap: 18px; }
+    .panel { background: color-mix(in srgb, var(--panel) 94%, transparent); border: 1px solid var(--line); border-radius: 7px; animation: rise .6s ease both; }
+    .form-panel { animation-delay: .08s; }
+    .result-panel { position: sticky; top: 20px; min-height: 465px; animation-delay: .16s; }
+    .panel-head { display: flex; align-items: center; justify-content: space-between; min-height: 62px; padding: 0 22px; border-bottom: 1px solid var(--line); }
+    .panel-title { font-size: 13px; font-weight: 800; }
+    .step-label { color: var(--muted); font: 11px var(--mono); }
+    .form-body { padding: 22px; }
+    .section-label { margin: 0 0 15px; color: var(--muted); font: 10px var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+    .field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .field label { display: block; margin-bottom: 7px; color: #c5cec7; font-size: 11px; font-weight: 700; }
+    .field input { width: 100%; height: 42px; padding: 0 12px; outline: 0; border: 1px solid var(--line); border-radius: 4px; background: #111512; color: var(--text); font-family: var(--mono); font-size: 13px; transition: border-color .18s, box-shadow .18s; }
+    .field input:focus { border-color: var(--mint); box-shadow: 0 0 0 3px #a8f07818; }
+    .divider { height: 1px; margin: 23px 0 21px; background: var(--line); }
+    .topic-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .topic { position: relative; }
+    .topic input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+    .topic label { min-height: 40px; display: flex; align-items: center; gap: 10px; padding: 0 11px; border: 1px solid var(--line); border-radius: 4px; background: #131714; color: #bdc6bf; cursor: pointer; font-size: 11px; font-weight: 700; transition: background .16s, border-color .16s, color .16s, transform .16s; }
+    .topic label:hover { border-color: #647267; transform: translateY(-1px); }
+    .topic label::before { width: 13px; height: 13px; flex: 0 0 13px; content: ""; border: 1px solid #68736a; border-radius: 3px; }
+    .topic input:checked + label { border-color: #769d62; background: var(--mint-dark); color: var(--mint); }
+    .topic input:checked + label::before { border-color: var(--mint); background: var(--mint); box-shadow: inset 0 0 0 3px var(--mint-dark); }
+    .topic input:focus-visible + label { outline: 2px solid var(--mint); outline-offset: 2px; }
+    .actions { display: flex; align-items: center; gap: 14px; margin-top: 22px; }
+    .submit { height: 44px; min-width: 176px; display: inline-flex; align-items: center; justify-content: center; gap: 12px; padding: 0 17px; border: 0; border-radius: 4px; background: var(--mint); color: #142011; cursor: pointer; font-size: 12px; font-weight: 800; transition: background .16s, transform .16s; }
+    .submit:hover { background: #bbff8d; transform: translateY(-1px); }
+    .submit:disabled { cursor: wait; opacity: .75; transform: none; }
+    .submit .arrow { font-size: 17px; line-height: 1; }
+    .reset { padding: 8px 0; border: 0; background: none; color: var(--muted); cursor: pointer; font-size: 11px; }
+    .reset:hover { color: var(--text); }
+    .result-content { padding: 24px 22px; }
+    .empty-state { min-height: 325px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+    .empty-icon { width: 70px; height: 70px; display: grid; place-items: center; margin-bottom: 20px; border: 1px solid #465148; border-radius: 50%; color: var(--mint); font: 28px var(--mono); background: radial-gradient(circle, #28332a, #171b18 70%); }
+    .empty-state h2 { margin: 0 0 8px; font-size: 15px; }
+    .empty-state p { max-width: 225px; margin: 0; color: var(--muted); font-size: 11px; line-height: 1.7; }
+    .result-view { display: none; }
+    .result-view.visible { display: block; animation: result-in .45s cubic-bezier(.2,.8,.2,1) both; }
+    .result-kicker { color: var(--muted); font: 10px var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+    .prediction { margin: 13px 0 19px; color: var(--mint); font-size: 34px; font-weight: 800; line-height: 1.1; overflow-wrap: anywhere; }
+    .result-rule { height: 1px; margin-bottom: 21px; background: var(--line); }
+    .probability-heading { display: flex; justify-content: space-between; margin-bottom: 16px; color: var(--muted); font: 10px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+    .prob-list { display: grid; gap: 16px; }
+    .prob-row { display: grid; gap: 7px; }
+    .prob-meta { display: flex; justify-content: space-between; gap: 12px; font-size: 11px; }
+    .prob-class { color: #d5ddd6; font-weight: 700; overflow-wrap: anywhere; }
+    .prob-value { color: var(--muted); font-family: var(--mono); }
+    .prob-track { height: 5px; overflow: hidden; border-radius: 5px; background: #303832; }
+    .prob-fill { width: 0; height: 100%; border-radius: inherit; background: var(--mint); transition: width .75s cubic-bezier(.2,.8,.2,1); }
+    .prob-row:nth-child(2) .prob-fill { background: var(--orange); }
+    .prob-row:nth-child(3) .prob-fill { background: #7dc9cf; }
+    .prob-row:nth-child(4) .prob-fill { background: #d79be5; }
+    .error-box { display: none; margin-top: 17px; padding: 11px 12px; border: 1px solid #7d4c43; border-radius: 4px; background: #321e1b; color: #ffb4a5; font-size: 11px; line-height: 1.5; }
+    .error-box.visible { display: block; animation: rise .2s ease both; }
+    .footnote { margin-top: 17px; color: #737d75; font: 10px var(--mono); line-height: 1.6; }
+    .spinner { width: 13px; height: 13px; border: 2px solid #14201155; border-top-color: #142011; border-radius: 50%; animation: spin .65s linear infinite; }
+    @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes result-in { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (max-width: 850px) {
+      .shell { padding: 0 24px 44px; }
+      .workspace { grid-template-columns: minmax(0, 1fr); }
+      .result-panel { position: static; min-height: 360px; }
+      .empty-state { min-height: 230px; }
+    }
+    @media (max-width: 520px) {
+      .shell { padding: 0 16px 32px; }
+      .topbar { height: 66px; }
+      .brand { font-size: 11px; }
+      .health { font-size: 9px; }
+      .intro { padding: 38px 0 25px; }
+      .intro p { font-size: 12px; }
+      .panel-head { min-height: 56px; padding: 0 16px; }
+      .form-body, .result-content { padding: 18px 16px; }
+      .field-grid { gap: 11px; }
+      .topic-grid { gap: 7px; }
+      .topic label { min-height: 39px; padding: 0 8px; gap: 7px; font-size: 10px; }
+      .actions { gap: 13px; }
+      .submit { min-width: 158px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark">&lt;/&gt;</span><span>PROBLEM DIFFICULTY STUDIO</span></div>
+      <div class="health" id="health"><span class="health-dot"></span><span id="healthText">CHECKING MODEL</span></div>
+    </header>
+
+    <main>
+      <section class="intro">
+        <div class="eyebrow">ML-powered assessment / 01</div>
+        <h1>Estimate problem difficulty.</h1>
+        <p>Describe the problem's size and algorithmic concepts. Your trained classifier will return a difficulty prediction with its confidence by class.</p>
+      </section>
+
+      <div class="workspace">
+        <section class="panel form-panel" aria-labelledby="input-title">
+          <div class="panel-head">
+            <div class="panel-title" id="input-title">Problem profile</div>
+            <div class="step-label">11 FEATURES</div>
+          </div>
+          <form class="form-body" id="predictForm">
+            <p class="section-label">01 / Problem dimensions</p>
+            <div class="field-grid">
+              <div class="field"><label for="problem_length">Problem length</label><input id="problem_length" name="problem_length" type="number" min="0" step="any" value="1200" required></div>
+              <div class="field"><label for="num_constraints">Number of constraints</label><input id="num_constraints" name="num_constraints" type="number" min="0" step="1" value="5" required></div>
+              <div class="field"><label for="num_tags">Number of tags</label><input id="num_tags" name="num_tags" type="number" min="0" step="1" value="3" required></div>
+              <div class="field"><label for="implementation_steps">Implementation steps</label><input id="implementation_steps" name="implementation_steps" type="number" min="0" step="1" value="6" required></div>
+            </div>
+
+            <div class="divider"></div>
+            <p class="section-label">02 / Algorithmic concepts</p>
+            <div class="topic-grid">
+              <div class="topic"><input id="has_tree" name="has_tree" type="checkbox" value="1"><label for="has_tree">Tree</label></div>
+              <div class="topic"><input id="has_graph" name="has_graph" type="checkbox" value="1"><label for="has_graph">Graph</label></div>
+              <div class="topic"><input id="has_heap" name="has_heap" type="checkbox" value="1"><label for="has_heap">Heap</label></div>
+              <div class="topic"><input id="has_recursion" name="has_recursion" type="checkbox" value="1"><label for="has_recursion">Recursion</label></div>
+              <div class="topic"><input id="has_binary_search" name="has_binary_search" type="checkbox" value="1"><label for="has_binary_search">Binary search</label></div>
+              <div class="topic"><input id="has_greedy" name="has_greedy" type="checkbox" value="1"><label for="has_greedy">Greedy</label></div>
+              <div class="topic"><input id="has_dp" name="has_dp" type="checkbox" value="1"><label for="has_dp">Dynamic programming</label></div>
+            </div>
+
+            <div class="actions">
+              <button class="submit" id="submitButton" type="submit"><span id="buttonText">Predict difficulty</span><span class="arrow" id="buttonIcon">↗</span></button>
+              <button class="reset" type="reset">Reset inputs</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel result-panel" aria-labelledby="result-title" aria-live="polite">
+          <div class="panel-head">
+            <div class="panel-title" id="result-title">Model output</div>
+            <div class="step-label">PREDICTION</div>
+          </div>
+          <div class="result-content">
+            <div class="empty-state" id="emptyState">
+              <div class="empty-icon">?</div>
+              <h2>Ready when you are</h2>
+              <p>Complete the profile and run a prediction to see the model's result.</p>
+            </div>
+            <div class="result-view" id="resultView">
+              <div class="result-kicker">Predicted difficulty</div>
+              <div class="prediction" id="prediction">-</div>
+              <div class="result-rule"></div>
+              <div class="probability-heading"><span>Class probability</span><span>CONFIDENCE</span></div>
+              <div class="prob-list" id="probabilityList"></div>
+              <p class="footnote">Probabilities are returned by the trained logistic regression model.</p>
+            </div>
+            <div class="error-box" id="errorBox" role="alert"></div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const form = document.getElementById("predictForm");
+    const submitButton = document.getElementById("submitButton");
+    const buttonText = document.getElementById("buttonText");
+    const buttonIcon = document.getElementById("buttonIcon");
+    const errorBox = document.getElementById("errorBox");
+    const featureNames = ["has_tree", "has_graph", "has_heap", "has_recursion", "has_binary_search", "has_greedy", "has_dp"];
+
+    async function checkHealth() {
+      const health = document.getElementById("health");
+      const healthText = document.getElementById("healthText");
+      try {
+        const response = await fetch("/api/health");
+        const data = await response.json();
+        if (data.status === "ready") {
+          health.classList.add("ready");
+          healthText.textContent = "MODEL READY";
+        } else {
+          healthText.textContent = "MODEL FILES MISSING";
+        }
+      } catch {
+        healthText.textContent = "API UNAVAILABLE";
+      }
+    }
+
+    function setLoading(loading) {
+      submitButton.disabled = loading;
+      buttonText.textContent = loading ? "Analyzing profile" : "Predict difficulty";
+      buttonIcon.innerHTML = loading ? '<span class="spinner"></span>' : "↗";
+    }
+
+    function showError(message) {
+      errorBox.textContent = message;
+      errorBox.classList.add("visible");
+    }
+
+    function renderResult(data) {
+      document.getElementById("emptyState").style.display = "none";
+      const resultView = document.getElementById("resultView");
+      resultView.classList.remove("visible");
+      void resultView.offsetWidth;
+      resultView.classList.add("visible");
+      document.getElementById("prediction").textContent = String(data.prediction);
+
+      const probabilityList = document.getElementById("probabilityList");
+      probabilityList.replaceChildren();
+      Object.entries(data.probability)
+        .sort((a, b) => b[1] - a[1])
+        .forEach(([label, probability], index) => {
+          const row = document.createElement("div");
+          row.className = "prob-row";
+          const meta = document.createElement("div");
+          meta.className = "prob-meta";
+          const name = document.createElement("span");
+          name.className = "prob-class";
+          name.textContent = label;
+          const value = document.createElement("span");
+          value.className = "prob-value";
+          value.textContent = `${(probability * 100).toFixed(1)}%`;
+          const track = document.createElement("div");
+          track.className = "prob-track";
+          const fill = document.createElement("div");
+          fill.className = "prob-fill";
+          fill.style.transitionDelay = `${index * 80}ms`;
+          fill.style.width = `${Math.max(0, Math.min(100, probability * 100))}%`;
+          meta.append(name, value);
+          track.append(fill);
+          row.append(meta, track);
+          probabilityList.append(row);
+        });
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      errorBox.classList.remove("visible");
+      setLoading(true);
+
+      const payload = {
+        problem_length: Number(form.elements.problem_length.value),
+        num_constraints: Number(form.elements.num_constraints.value),
+        num_tags: Number(form.elements.num_tags.value),
+        implementation_steps: Number(form.elements.implementation_steps.value),
+      };
+      featureNames.forEach((name) => {
+        payload[name] = Number(form.elements[name].checked);
+      });
+
+      try {
+        const response = await fetch("/predict", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(typeof data.detail === "string" ? data.detail : "Prediction request failed.");
+        }
+        renderResult(data);
+      } catch (error) {
+        showError(error.message || "Could not reach the prediction API.");
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    form.addEventListener("reset", () => {
+      errorBox.classList.remove("visible");
+    });
+
+    checkHealth();
+  </script>
+</body>
+</html>
